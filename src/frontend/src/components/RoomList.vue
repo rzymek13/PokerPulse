@@ -28,8 +28,8 @@
 <script>
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { Client } from '@stomp/stompjs';
 
 
 
@@ -92,25 +92,32 @@ export default {
         );
       }
     },
-    async joinRoom(roomId) {
+async joinRoom(roomId) {
+  this.isJoining = true;
+  try {
     const socket = new SockJS('http://localhost:8080/poker');
-    stompClient = new Client({
-        webSocketFactory: () => socket,
-        reconnectDelay: 5000,
-        onConnect: () => {
-            console.log('Connected to WebSocket');
-            // Subskrybuj kanał gry
-            stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
-                const gameState = JSON.parse(message.body);
-                console.log('Updated game state:', gameState);
-                updateUI(gameState); // Aktualizuj interfejs użytkownika
-            });
-        },
-        onStompError: (error) => {
-            console.error('WebSocket error:', error);
-        }
-    });
+    const stompClient = Stomp.over(socket);
+
+    stompClient.onConnect = () => {
+      console.log('Connected to WebSocket');
+      // Subskrybuj kanał gry
+      stompClient.subscribe(`/topic/room/${roomId}`, (message) => {
+        const gameState = JSON.parse(message.body);
+        console.log('Updated game state:', gameState);
+        // updateUI(gameState); // Aktualizuj interfejs użytkownika (implement as needed)
+      });
+    };
+
+    stompClient.onStompError = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
     stompClient.activate();
+  } catch (error) {
+    alert('Błąd dołączania do pokoju: ' + error.message);
+  } finally {
+    this.isJoining = false;
+  }
 }
     },
 };
