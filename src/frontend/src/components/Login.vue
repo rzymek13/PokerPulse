@@ -34,6 +34,7 @@ export default {
 
         });
         alert(response.data);
+        localStorage.setItem('username', this.username)
         this.$router.push('/RoomList'); 
       } catch (error) {
         alert('Błąd logowania: ' + error.response.data.message);

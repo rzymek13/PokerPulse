@@ -8,7 +8,7 @@ export default defineConfig({
     assetsDir: '',
   },
   define: {
-    global: 'window', // Definiuje global jako window
+    global: 'window',
   },
   server: {
     port: 8081,
@@ -17,10 +17,6 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
       }
-      //   '/poker': {
-      //     target: 'ws://localhost:8080',
-      //     ws: true,
-      //   },
     }
   }
 });

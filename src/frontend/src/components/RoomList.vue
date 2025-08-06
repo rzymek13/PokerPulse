@@ -101,11 +101,9 @@ async joinRoom(roomId) {
     stompClient.onConnect = () => {
       console.log('Connected to WebSocket');
       // Subskrybuj kanał gry
-      stompClient.subscribe(`/topic/room/${roomId}`, (message) => {
-        const gameState = JSON.parse(message.body);
-        console.log('Updated game state:', gameState);
-        // updateUI(gameState); // Aktualizuj interfejs użytkownika (implement as needed)
-      });
+      stompClient.subscribe(`/topic/room/${roomId}`)
+      this.$router.push({ name: 'GameRoom', params: { id: roomId } });
+      window.stompClient = stompClient;
     };
 
     stompClient.onStompError = (error) => {
