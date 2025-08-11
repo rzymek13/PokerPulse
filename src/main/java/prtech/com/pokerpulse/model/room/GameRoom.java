@@ -7,11 +7,17 @@ import prtech.com.pokerpulse.model.chat.ChatMessage;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Data
 public class GameRoom {
-    private String roomId;
+
+
+    private Integer roomId = (int) (Math.random() * 10000);
+    private String roomName;
     private List<Player> players;
     private List<ChatMessage> chatHistory = new ArrayList<>();
     private PokerGame game;
+
+    
 
 }

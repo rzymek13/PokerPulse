@@ -1,5 +1,6 @@
 package prtech.com.pokerpulse.service;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.stereotype.Service;
 import prtech.com.pokerpulse.model.chat.ChatMessage;
 import prtech.com.pokerpulse.model.player.Player;
@@ -14,27 +15,28 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class GameService {
 
-    private final Map<String, GameRoom> gameRooms = new ConcurrentHashMap<>();
+    private final Map<Integer, GameRoom> gameRooms = new ConcurrentHashMap<>();
 
     public List<GameRoom> getAllRooms() {
         return List.copyOf(gameRooms.values());
     }
 
-    public GameRoom getRoomById(String roomId) {
+    public GameRoom getRoomById(Integer roomId) {
         GameRoom room = gameRooms.get(roomId);
         if (room == null) {
             throw new RuntimeException("Room with ID " + roomId + " not found");
         }
         return room;
     }
-    public GameRoom createRoom(String roomId) {
+    public GameRoom createRoom(String roomName) {
         GameRoom room = new GameRoom();
-        room.setRoomId(roomId);
-        gameRooms.put(roomId, room);
+        room.setRoomName(roomName);
+        System.out.println("Creating room with name: " + roomName+" and ID: " + room.getRoomId());
+        gameRooms.put(room.getRoomId(), room);
         return room;
     }
 
-    public GameRoom joinRoom(String roomId, Player player) {
+    public GameRoom joinRoom(Integer roomId, Player player) {
         GameRoom room = gameRooms.get(roomId);
         if (room == null) {
             throw new IllegalArgumentException("Room not found");
@@ -42,7 +44,7 @@ public class GameService {
         room.getPlayers().add(player);
         return room;
     }
-    public ChatMessage sendMessage(String roomId, ChatMessage message) {
+    public ChatMessage sendMessage(Integer roomId, ChatMessage message) {
         GameRoom room = gameRooms.get(roomId);
         if (room == null) {
             throw new IllegalArgumentException("Room not found");

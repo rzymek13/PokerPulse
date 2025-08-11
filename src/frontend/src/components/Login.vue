@@ -31,9 +31,14 @@ export default {
         const response = await axios.post('/api/auth/login', {
           username: this.username,
           password: this.password,
-
         });
         alert(response.data);
+        localStorage.setItem('username', this.username);
+        if (response?.data?.token) {
+          localStorage.setItem('jwt', response.data.token);
+        } else if (response?.data?.jwt) {
+          localStorage.setItem('jwt', response.data.jwt);
+        }
         this.$router.push('/RoomList'); 
       } catch (error) {
         alert('Błąd logowania: ' + error.response.data.message);

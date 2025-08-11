@@ -22,7 +22,7 @@ public class ChatController {
 
     @MessageMapping("/chat/{roomId}")
     @SendTo("/topic/room/{roomId}")
-    public ChatMessage sendMessage(@DestinationVariable String roomId, @Payload ChatMessage message) {
+    public ChatMessage sendMessage(@DestinationVariable Integer roomId, @Payload ChatMessage message) {
         GameRoom room = gameService.getRoomById(roomId);
         room.getChatHistory().add(message);
         return message;
