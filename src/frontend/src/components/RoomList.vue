@@ -1,6 +1,7 @@
 <template>
   <div class="room-list">
     <h1>Lista pokoi</h1>
+    <p v-if="username" style="opacity:0.8">Zalogowano jako: {{ username }}</p>
     <div class="create-room">
       <input
         v-model="roomName"
@@ -14,7 +15,7 @@
     </div>
     <ul v-if="roomList.length">
       <li v-for="room in roomList" :key="room.roomId">
-        <span>{{ room.name }} (ID: {{ room.roomId }})</span>
+        <span>{{ room.roomName }} (ID: {{ room.roomId }})</span>
         <button @click="joinRoom(room.roomId)" :disabled="isJoining">
           Dołącz
         </button>
@@ -41,6 +42,7 @@ export default {
   },
   data() {
     return {
+      username: localStorage.getItem('username') || '',
       roomName: '',
       roomList: [],
       isCreating: false,
@@ -58,12 +60,15 @@ export default {
       }
       this.isCreating = true;
       try {
-        const response = await axios.post(
-          '/api/rooms',
-          { name: this.roomName.trim() },
-          { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
-        );
-        alert(`Pokój utworzony: ${response.data.name}`);
+        console.log(`Tworzenie pokoju: ${this.roomName}`);
+        const response = await axios.post('/api/rooms', this.roomName, {
+             headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+        },
+        });
+        console.log(response.data);
+        alert(`Pokój utworzony: ${response.data.roomName}`);
         this.roomName = ''; // Resetuj pole
         await this.fetchRooms(); // Odśwież listę
       } catch (error) {
@@ -83,7 +88,7 @@ export default {
         this.roomList = response.data;
         // Logowanie dla debugowania
         this.roomList.forEach((room) =>
-          console.log(`Pokój:  (ID: ${room.roomId})`)
+          console.log(`Pokój: ${room.roomName} (ID: ${room.roomId})`)
         );
       } catch (error) {
         alert(
@@ -95,24 +100,8 @@ export default {
 async joinRoom(roomId) {
   this.isJoining = true;
   try {
-    const socket = new SockJS('http://localhost:8080/poker');
-    const stompClient = Stomp.over(socket);
-
-    stompClient.onConnect = () => {
-      console.log('Connected to WebSocket');
-      // Subskrybuj kanał gry
-      stompClient.subscribe(`/topic/room/${roomId}`)
-      this.$router.push({ name: 'GameRoom', params: { id: roomId } });
-      window.stompClient = stompClient;
-    };
-
-    stompClient.onStompError = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    stompClient.activate();
-  } catch (error) {
-    alert('Błąd dołączania do pokoju: ' + error.message);
+    localStorage.setItem('roomId', String(roomId));
+    this.$router.push('/GameRoom');
   } finally {
     this.isJoining = false;
   }

@@ -6,7 +6,8 @@
       <h2>Czat</h2>
       <div class="chat-messages">
         <div v-for="message in chatMessages" :key="message.timestamp">
-          <strong>{{ message.username }}:</strong> {{ message.content }}
+          <strong>{{ message.sender && message.sender.username ? message.sender.username : message.username }}:</strong>
+          {{ message.content }}
           <span class="timestamp">({{ formatDate(message.timestamp) }})</span>
         </div>
       </div>
@@ -34,43 +35,98 @@ export default {
 
   data() {
     return {
-    chatMessages: [],
-    chatMessage: '',
-    username: '',
-    stompClient: null,
-    isSending: false,
+      chatMessages: [],
+      chatMessage: '',
+      username: '',
+      roomId: null,
+      stompClient: null,
+      subscription: null,
+      isSending: false,
     };
   },
   async mounted() {
     this.username = localStorage.getItem('username');
-    this.gameId = this.$route.params.id;
-    console.log(localStorage.getItem('username'))
+    this.roomId = this.$route.params.id || localStorage.getItem('roomId');
+    console.log(`roomId: ${this.roomId}`);
     this.stompClient = window.stompClient;
-      if (this.stompClient && this.gameId) {
-    this.stompClient.subscribe(`/topic/room/${this.gameId}`, (message) => {
-      const msg = JSON.parse(message.body);
-      this.chatMessages.push(msg);
-    });
-  }
+
+    const subscribeToRoom = () => {
+      if (!this.roomId || !this.stompClient) return;
+      if (this.subscription) {
+        try { this.subscription.unsubscribe(); } catch (_) {}
+        this.subscription = null;
+      }
+      this.subscription = this.stompClient.subscribe(`/topic/room/${this.roomId}`, (frame) => {
+        try {
+          const msg = JSON.parse(frame.body);
+          if (!msg.sender && msg.username) {
+            msg.sender = { username: msg.username };
+          }
+          this.chatMessages.push(msg);
+        } catch (e) {
+          console.error('Nie można sparsować wiadomości czatu:', e);
+        }
+      });
+    };
+
+    if (this.stompClient && this.stompClient.connected) {
+      subscribeToRoom();
+    } else if (this.stompClient) {
+      // RoomList inicjuje połączenie i nawigację po onConnect,
+      // więc tutaj tylko czekamy aż połączenie będzie gotowe.
+      this.stompClient.onConnect = () => {
+        console.log('Connected to WebSocket (GameRoom)');
+        subscribeToRoom();
+      };
+    } else {
+      // Fallback: nowe okno/przeglądarka bez globalnego klienta – utwórz połączenie tutaj.
+      const socket = new SockJS('http://localhost:8080/poker');
+      const client = new Client({
+        webSocketFactory: () => socket,
+        reconnectDelay: 5000,
+      });
+      client.onConnect = () => {
+        console.log('Connected to WebSocket (GameRoom fallback)');
+        this.stompClient = client;
+        window.stompClient = client;
+        subscribeToRoom();
+      };
+      client.onStompError = (error) => console.error('WebSocket error:', error);
+      client.activate();
+      this.stompClient = client;
+      window.stompClient = client;
+    }
   },
   beforeUnmount() {
-    if (this.stompClient) {
-      this.stompClient.deactivate();
+    if (this.subscription) {
+      try { this.subscription.unsubscribe(); } catch (_) {}
+      this.subscription = null;
     }
+    // Nie dezaktywujemy klienta globalnego – inne ekrany mogą go używać
   },
   methods: {
   sendChatMessage() {
     if (!this.chatMessage.trim()) return;
+    if (!this.stompClient || !this.stompClient.connected) {
+      alert('Połączenie z czatem nie jest aktywne!');
+      return;
+    }
     const message = {
-      username: this.username,
+      sender: { username: this.username },
       content: this.chatMessage,
       timestamp: new Date().toISOString(),
     };
-    this.stompClient.publish({
-      destination: `/app/chat/${this.gameId}`,
-      body: JSON.stringify(message),
-    });
-    this.chatMessage = '';
+    this.isSending = true;
+    try {
+      this.stompClient.publish({
+        destination: `/app/chat/${this.roomId}`,
+        body: JSON.stringify(message),
+      });
+      // Czekamy na echo z serwera, żeby uniknąć duplikatów
+      this.chatMessage = '';
+    } finally {
+      this.isSending = false;
+    }
   },
   formatDate(timestamp) {
     const date = new Date(timestamp);

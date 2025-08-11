@@ -33,6 +33,18 @@ export default {
           password: this.password,
         });
         alert(response.data);
+        const login = await axios.post('/api/auth/login', {
+          username: this.username,
+          password: this.password,
+        });
+        // Zapamiętaj username (i ewentualnie token, jeśli backend go zwraca)
+        localStorage.setItem('username', this.username);
+        if (login?.data?.token) {
+          localStorage.setItem('jwt', login.data.token);
+        } else if (login?.data?.jwt) {
+          localStorage.setItem('jwt', login.data.jwt);
+        }
+        this.$router.push('/RoomList'); 
       } catch (error) {
         alert('Błąd rejestracji: ' + error.response.data.message);
       }
