@@ -11,13 +11,11 @@ import java.util.List;
 @Data
 public class GameRoom {
 
-
     private Integer roomId = (int) (Math.random() * 10000);
     private String roomName;
-    private List<Player> players;
+    private String creatorUsername;
+    private List<Player> players = new ArrayList<>();
     private List<ChatMessage> chatHistory = new ArrayList<>();
     private PokerGame game;
-
-    
-
 }
+

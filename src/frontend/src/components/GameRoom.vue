@@ -2,6 +2,20 @@
   <div class="poker-table">
     <h2>gracz : {{ username }}</h2>
 
+    <div class="room-status">
+      <h2>Gracze</h2>
+      <ul>
+        <li v-for="p in players" :key="p.username">
+          <label>
+            <input type="checkbox" :checked="p.ready" :disabled="p.username !== username" @change="toggleReady($event.target.checked)" />
+            {{ p.username }} <span v-if="p.username === roomCreator">(twórca)</span>
+          </label>
+          <span v-if="p.username === username && p.hand && p.hand.length"> | Twoje karty: {{ formatCards(p.hand) }}</span>
+        </li>
+      </ul>
+      <button v-if="isCreator && allReady" @click="startGame">Start gry</button>
+    </div>
+
     <div class="chat">
       <h2>Czat</h2>
       <div class="chat-messages">
@@ -33,20 +47,30 @@ import { Client } from '@stomp/stompjs';
 
 export default {
 
-  data() {
-    return {
-      chatMessages: [],
-      chatMessage: '',
-      username: '',
+computed: {
+isCreator() {
+return this.username && this.roomCreator && this.username === this.roomCreator;
+},
+allReady() {
+return this.players.length >= 2 && this.players.every(p => p.ready);
+}
+},
+data() {
+return {
+chatMessages: [],
+  chatMessage: '',
+    username: '',
       roomId: null,
+      players: [],
+      roomCreator: null,
       stompClient: null,
       subscription: null,
       isSending: false,
     };
   },
   async mounted() {
-    this.username = localStorage.getItem('username');
-    this.roomId = this.$route.params.id || localStorage.getItem('roomId');
+    this.username = sessionStorage.getItem('username') || '';
+    this.roomId = this.$route.params.id || sessionStorage.getItem('roomId');
     console.log(`roomId: ${this.roomId}`);
     this.stompClient = window.stompClient;
 
@@ -56,6 +80,7 @@ export default {
         try { this.subscription.unsubscribe(); } catch (_) {}
         this.subscription = null;
       }
+      // chat
       this.subscription = this.stompClient.subscribe(`/topic/room/${this.roomId}`, (frame) => {
         try {
           const msg = JSON.parse(frame.body);
@@ -65,6 +90,16 @@ export default {
           this.chatMessages.push(msg);
         } catch (e) {
           console.error('Nie można sparsować wiadomości czatu:', e);
+        }
+      });
+      // room state
+      this.stompClient.subscribe(`/topic/room/${this.roomId}/state`, (frame) => {
+        try {
+          const room = JSON.parse(frame.body);
+          this.players = room.players || [];
+          this.roomCreator = room.creatorUsername || null;
+        } catch (e) {
+          console.error('Nie można sparsować stanu pokoju:', e);
         }
       });
     };
@@ -95,6 +130,19 @@ export default {
       client.activate();
       this.stompClient = client;
       window.stompClient = client;
+    }
+
+    // Dołącz gracza do pokoju po wejściu (REST)
+    try {
+      await axios.post(`/api/rooms/${this.roomId}/join`, this.username, {
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
+      // Pobierz stan pokoju
+      const res = await axios.get(`/api/rooms/${this.roomId}`);
+      this.players = res.data.players || [];
+      this.roomCreator = res.data.creatorUsername || null;
+    } catch (e) {
+      console.error('Join/get room failed', e);
     }
   },
   beforeUnmount() {
@@ -128,9 +176,28 @@ export default {
       this.isSending = false;
     }
   },
+  toggleReady(checked) {
+    if (!this.stompClient || !this.stompClient.connected) return;
+    const dto = { username: this.username, ready: !!checked };
+    this.stompClient.publish({
+      destination: `/app/game/${this.roomId}/ready`,
+      body: JSON.stringify(dto),
+    });
+  },
+  startGame() {
+    if (!this.stompClient || !this.stompClient.connected) return;
+    const dto = { username: this.username };
+    this.stompClient.publish({
+      destination: `/app/game/${this.roomId}/start`,
+      body: JSON.stringify(dto),
+    });
+  },
   formatDate(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleString();
+  },
+  formatCards(cards) {
+    return cards.map(c => `${c.rank?.symbol || c.rank} ${c.suit?.symbol || c.suit}`).join(', ');
   }
 }
 };

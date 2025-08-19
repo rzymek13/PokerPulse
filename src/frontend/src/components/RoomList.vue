@@ -42,7 +42,7 @@ export default {
   },
   data() {
     return {
-      username: localStorage.getItem('username') || '',
+      username: sessionStorage.getItem('username') || '',
       roomName: '',
       roomList: [],
       isCreating: false,
@@ -62,10 +62,10 @@ export default {
       try {
         console.log(`Tworzenie pokoju: ${this.roomName}`);
         const response = await axios.post('/api/rooms', this.roomName, {
-             headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-        },
+        headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+          Authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`
+            },
         });
         console.log(response.data);
         alert(`Pokój utworzony: ${response.data.roomName}`);
@@ -83,7 +83,7 @@ export default {
     async fetchRooms() {
       try {
         const response = await axios.get('/api/rooms', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}` },
         });
         this.roomList = response.data;
         // Logowanie dla debugowania
@@ -100,7 +100,7 @@ export default {
 async joinRoom(roomId) {
   this.isJoining = true;
   try {
-    localStorage.setItem('roomId', String(roomId));
+    sessionStorage.setItem('roomId', String(roomId));
     this.$router.push('/GameRoom');
   } finally {
     this.isJoining = false;

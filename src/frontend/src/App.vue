@@ -5,8 +5,8 @@ import Register from './components/Register.vue';
 
 <template>
   <div>
-    <router-link to="/login">Logowanie</router-link>
-    <router-link to="/register">Rejestracja</router-link>
+    <router-link to="/login" data-testid="home-LoginPage">Logowanie</router-link>
+    <router-link to="/register" data-testid="home-registerPage">Rejestracja</router-link>
     <router-view></router-view>
   </div>
 

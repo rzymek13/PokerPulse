@@ -33,11 +33,12 @@ export default {
           password: this.password,
         });
         alert(response.data);
-        localStorage.setItem('username', this.username);
+        // Użyj sessionStorage, aby każdy tab miał własnego użytkownika
+        sessionStorage.setItem('username', this.username);
         if (response?.data?.token) {
-          localStorage.setItem('jwt', response.data.token);
+          sessionStorage.setItem('jwt', response.data.token);
         } else if (response?.data?.jwt) {
-          localStorage.setItem('jwt', response.data.jwt);
+          sessionStorage.setItem('jwt', response.data.jwt);
         }
         this.$router.push('/RoomList'); 
       } catch (error) {
