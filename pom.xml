@@ -17,6 +17,8 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<playwright.version>1.50.0</playwright.version>
 		<testng.version>7.11.0</testng.version>
