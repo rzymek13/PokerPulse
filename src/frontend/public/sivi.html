@@ -82,8 +82,8 @@
         <div class="badges">
           <span class="badge"><i class="fa-solid fa-robot"></i> Selenium / Playwright</span>
           <span class="badge"><i class="fa-solid fa-network-wired"></i> API: Rest Assured / Karate</span>
-          <span class="badge"><i class="fa-solid fa-diagram-project"></i> CI/CD: Jenkins, GHA, ADO</span>
-          <span class="badge"><i class="fa-solid fa-gauge-high"></i> Gatling / JMeter</span>
+          <span class="badge"><i class="fa-solid fa-diagram-project"></i> CI/CD: Jenkins, GHA</span>
+          <span class="badge"><i class="fa-solid fa-gauge-high"></i> Gatling </span>
         </div>
       </div>
       <div class="contact">
@@ -120,7 +120,6 @@
             <span class="chip">Rest Assured</span>
             <span class="chip">Karate</span>
             <span class="chip">Postman</span>
-            <span class="chip">Schema/Mock</span>
           </div>
           <div class="bar"><span style="width:85%"></span></div>
         </div>
@@ -145,16 +144,6 @@
           <div class="bar"><span style="width:80%"></span></div>
         </div>
         <div class="card">
-          <h3>Performance</h3>
-          <div class="chips">
-            <span class="chip">Gatling</span>
-            <span class="chip">JMeter</span>
-            <span class="chip">SLO/SLA</span>
-            <span class="chip">Profiling</span>
-          </div>
-          <div class="bar"><span style="width:68%"></span></div>
-        </div>
-        <div class="card">
           <h3>Praktyki QA</h3>
           <div class="chips">
             <span class="chip">Test Strategy</span>
@@ -174,10 +163,25 @@
         <div class="timeline">
           <div class="t-item">
             <div>
+              <div class="t-role">PokerPulse — aplikacja real‑time (projekt własny)</div>
+              <ul class="clean">
+                <li>Architektura: Vue 3 + Vite (frontend) i Spring Boot 3 (backend)</li>
+                <li>Realtime: STOMP/SockJS/WebSocket — czat, pokoje gier, start rozdania</li>
+                <li>REST: tworzenie/dołączanie do pokoi, pobieranie stanu</li>
+                <li>Persistencja: Spring Data JDBC + PostgreSQL (schema.sql)</li>
+                <li>Testy: JUnit 5 (unit), Playwright + TestNG (E2E), raporty Allure</li>
+                <li>Deploy: Azure App Service (API) + Azure Static Web Apps (UI), GitHub Actions</li>
+              </ul>
+            </div>
+            <div class="t-where">2025</div>
+          </div>
+          <div class="t-item">
+            <div>
               <div class="t-role">Framework E2E (bankowość inwestycyjna)</div>
               <ul class="clean">
-                <li>Playwright + REST, smoke na PR, nocna regresja</li>
-                <li>Stabilne selektory, retry, izolacja danych</li>
+                <li>Playwright + REST, smoke na PR i nocna regresja</li>
+                <li>Stabilne selektory, retry, izolacja danych testowych</li>
+                <li>Raporty Allure, integracja z CI (Jenkins/GitHub Actions)</li>
               </ul>
             </div>
             <div class="t-where">2024–2025</div>
@@ -186,8 +190,9 @@
             <div>
               <div class="t-role">Testy kontraktowe i integracyjne (B2B)</div>
               <ul class="clean">
-                <li>Karate + Rest Assured, walidacje schematów</li>
-                <li>Pipeline: Jenkins/ADO, raporty Allure</li>
+                <li>Karate + Rest Assured — walidacja kontraktów i scenariusze integracyjne</li>
+                <li>Pipeline: Jenkins / Azure DevOps, raportowanie i wersjonowanie</li>
+                <li>Mocki, idempotencja, testy na środowiskach CI</li>
               </ul>
             </div>
             <div class="t-where">2023–2024</div>
@@ -196,8 +201,8 @@
             <div>
               <div class="t-role">Performance (e‑commerce)</div>
               <ul class="clean">
-                <li>Gatling — scenariusze load/soak/stress</li>
-                <li>Analiza wąskich gardeł, rekomendacje</li>
+                <li>Gatling — scenariusze load/soak/stress z metrykami SLO/SLA</li>
+                <li>Analiza wąskich gardeł, rekomendacje optymalizacji</li>
               </ul>
             </div>
             <div class="t-where">2023</div>
@@ -205,25 +210,7 @@
         </div>
       </div>
       <div>
-        <h2><i class="fa-solid fa-star"></i> Osiągnięcia</h2>
-        <div class="grid" style="grid-template-columns: 1fr 1fr; gap:12px">
-          <div class="card" style="text-align:center">
-            <div style="font-size:28px; font-weight:700; color:var(--accent)">65%</div>
-            <div style="color:var(--muted)">wzrost pokrycia regresji</div>
-          </div>
-          <div class="card" style="text-align:center">
-            <div style="font-size:28px; font-weight:700; color:var(--ok)">-40%</div>
-            <div style="color:var(--muted)">mniej testów manualnych</div>
-          </div>
-          <div class="card" style="text-align:center">
-            <div style="font-size:28px; font-weight:700; color:var(--primary)"><2%</div>
-            <div style="color:var(--muted)">flakiness E2E</div>
-          </div>
-          <div class="card" style="text-align:center">
-            <div style="font-size:28px; font-weight:700; color:#f59e0b">CI/CD</div>
-            <div style="color:var(--muted)">pełna integracja jakości</div>
-          </div>
-        </div>
+        <!-- Sekcja osiągnięć usunięta na prośbę użytkownika -->
       </div>
     </section>
 
@@ -233,9 +220,19 @@
         <h2><i class="fa-solid fa-certificate"></i> Certyfikaty</h2>
         <div class="card">
           <ul class="clean">
-            <li>ISTQB Foundation (2023)</li>
+            <li>ISTQB Foundation level (2023)</li>
+            <li>Azure AZ-104T00 (2023)</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h2><i class="fa-solid fa-chalkboard-teacher"></i> Szkolenia</h2>
+        <div class="card">
+          <ul class="clean">
             <li>ISTQB Technical Test Analyst (2024)</li>
-            <li>Modern Java (2024), Docker (2023), Wzorce projektowe (2023)</li>
+            <li>Modern Java (2024)</li>
+            <li>Docker (2023)</li>
+            <li>Wzorce projektowe (2023)</li>
           </ul>
         </div>
       </div>
@@ -265,5 +262,23 @@
 
     <footer>© 2025 Przemysław Rzymkowski — Test Automation Developer</footer>
   </div>
+  <script>
+    // Ustal dostępny URL do PDF (public/Rzymkowski-CV.pdf preferowany)
+    (async () => {
+      const candidates = [
+        '/Rzymkowski-CV.pdf',            // jeśli wrzucony do public/
+        '/src/Rzymkowski-CV.pdf'         // fallback: plik w src/
+      ];
+      let target = candidates[0];
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url, { method: 'HEAD' });
+          if (res.ok) { target = url; break; }
+        } catch (e) { /* ignore */ }
+      }
+      const a = document.getElementById('cv-link');
+      if (a) a.href = target;
+    })();
+  </script>
 </body>
 </html>
