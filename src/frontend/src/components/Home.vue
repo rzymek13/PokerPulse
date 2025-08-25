@@ -10,7 +10,7 @@
           <p class="label">CV — umiejętności i narzędzia</p>
         </a>
 
-        <a class="panel" href="https://github.com/rzymek13" target="_blank" rel="noopener">
+        <a class="panel" href="https://github.com/rzymek13/PokerPulse" target="_blank" rel="noopener">
           <h2>GitHub</h2>
           <p class="label">github.com/rzymek13</p>
         </a>
