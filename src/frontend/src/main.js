@@ -6,8 +6,10 @@ import Login from './components/Login.vue';
 import Register from './components/Register.vue';
 import RoomList from './components/RoomList.vue';
 import GameRoom from './components/GameRoom.vue';
+import Home from './components/Home.vue';
 
 const routes = [
+    { path: '/', component: Home },
     { path: '/login', component: Login },
     { path: '/register', component: Register },
     { path: '/roomList', component: RoomList },
