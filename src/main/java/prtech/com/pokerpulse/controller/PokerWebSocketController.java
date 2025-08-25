@@ -31,20 +31,20 @@ public class PokerWebSocketController {
         public boolean ready;
     }
 
-    @MessageMapping("/game/{gameId}/ready")
-    public void handleReady(@DestinationVariable Long gameId, @Payload ReadyDTO dto) {
-        GameRoom room = gameService.setReady(gameId.intValue(), dto.username, dto.ready);
-        messagingTemplate.convertAndSend("/topic/room/" + gameId + "/state", room);
-    }
+//    @MessageMapping("/game/{gameId}/ready")
+//    public void handleReady(@DestinationVariable Long gameId, @Payload ReadyDTO dto) {
+//        GameRoom room = gameService.setReady(gameId.intValue(), dto.username, dto.ready);
+//        messagingTemplate.convertAndSend("/topic/room/" + gameId + "/state", room);
+//    }
 
     // Start game
     public static class StartDTO {
         public String username;
     }
 
-    @MessageMapping("/game/{gameId}/start")
-    public void handleStart(@DestinationVariable Long gameId, @Payload StartDTO dto) {
-        GameRoom room = gameService.startGame(gameId.intValue(), dto.username);
-        messagingTemplate.convertAndSend("/topic/room/" + gameId + "/state", room);
-    }
+//    @MessageMapping("/game/{gameId}/start")
+//    public void handleStart(@DestinationVariable Long gameId, @Payload StartDTO dto) {
+//        GameRoom room = gameService.startGame(gameId.intValue(), dto.username);
+//        messagingTemplate.convertAndSend("/topic/room/" + gameId + "/state", room);
+//    }
 }

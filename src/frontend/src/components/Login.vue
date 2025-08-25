@@ -1,22 +1,28 @@
 <template>
-  <div>
-    <h1>Logowanie</h1>
-    <form @submit.prevent="login">
-      <div>
-        <label for="username">Nazwa użytkownika:</label>
-        <input type="text" id="username" v-model="username" required />
-      </div>
-      <div>
-        <label for="password">Hasło:</label>
-        <input type="password" id="password" v-model="password" required />
-      </div>
-      <button type="submit">Zaloguj</button>
-    </form>
+  <div class="container">
+    <div class="panel" style="max-width:520px; margin: 40px auto;">
+      <h1>Logowanie</h1>
+      <p class="subtitle">Wróć do lobby i dołącz do pokoju</p>
+      <form class="form" @submit.prevent="login">
+        <div class="field">
+          <label class="label" for="username">Nazwa użytkownika</label>
+          <input class="input" type="text" id="username" v-model="username" required />
+        </div>
+        <div class="field">
+          <label class="label" for="password">Hasło</label>
+          <input class="input" type="password" id="password" v-model="password" required />
+        </div>
+        <div class="grid" style="grid-template-columns: 1fr auto; align-items:center;">
+          <small class="label">Nie masz konta? <router-link to="/register">Zarejestruj się</router-link></small>
+          <button class="btn btn-primary" type="submit">Zaloguj</button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
 
 export default {
   data() {
@@ -28,7 +34,7 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await axios.post('/api/auth/login', {
+        const response = await api.post('/api/auth/login', {
           username: this.username,
           password: this.password,
         });

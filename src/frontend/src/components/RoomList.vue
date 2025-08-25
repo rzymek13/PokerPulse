@@ -1,33 +1,39 @@
 <template>
-  <div class="room-list">
-    <h1>Lista pokoi</h1>
-    <p v-if="username" style="opacity:0.8">Zalogowano jako: {{ username }}</p>
-    <div class="create-room">
-      <input
-        v-model="roomName"
-        placeholder="Nazwa pokoju"
-        @keyup.enter="createRoom"
-        :disabled="isCreating"
-      />
-      <button @click="createRoom" :disabled="isCreating || !roomName.trim()">
-        Stwórz
-      </button>
+  <div class="container">
+    <div class="panel" style="max-width:720px; margin: 24px auto;">
+      <h1>Lobby pokoi</h1>
+      <p class="subtitle" v-if="username">Zalogowano jako: <strong>{{ username }}</strong></p>
+
+      <div class="grid grid-2 mt-12" style="align-items:end;">
+        <div class="field">
+          <label class="label">Nazwa pokoju</label>
+          <input class="input" v-model="roomName" placeholder="np. Pokerowcy" @keyup.enter="createRoom" :disabled="isCreating" />
+        </div>
+        <div>
+          <button class="btn btn-primary" @click="createRoom" :disabled="isCreating || !roomName.trim()">Stwórz pokój</button>
+        </div>
+      </div>
+
+      <ul class="list mt-16" v-if="roomList.length">
+        <li class="list-item" v-for="room in roomList" :key="room.roomId">
+          <div>
+            <strong>{{ room.roomName }}</strong>
+            <div class="label">ID: {{ room.roomId }}</div>
+          </div>
+          <button class="btn" @click="joinRoom(room.roomId)" :disabled="isJoining">Dołącz</button>
+        </li>
+      </ul>
+      <p v-else class="label mt-16">Brak dostępnych pokoi.</p>
+
+      <div class="mt-24">
+        <button class="btn btn-danger" @click="logout">Wyloguj</button>
+      </div>
     </div>
-    <ul v-if="roomList.length">
-      <li v-for="room in roomList" :key="room.roomId">
-        <span>{{ room.roomName }} (ID: {{ room.roomId }})</span>
-        <button @click="joinRoom(room.roomId)" :disabled="isJoining">
-          Dołącz
-        </button>
-      </li>
-    </ul>
-    <p v-else>Brak dostępnych pokoi.</p>
-    <button class="logout-btn" @click="logout">Wyloguj</button>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
 import { useRouter } from 'vue-router';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -61,11 +67,11 @@ export default {
       this.isCreating = true;
       try {
         console.log(`Tworzenie pokoju: ${this.roomName}`);
-        const response = await axios.post('/api/rooms', this.roomName, {
-        headers: {
+        const response = await api.post('/api/rooms', this.roomName, {
+          headers: {
             'Content-Type': 'text/plain; charset=utf-8',
-          Authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`
-            },
+            Authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`
+          },
         });
         console.log(response.data);
         alert(`Pokój utworzony: ${response.data.roomName}`);
@@ -82,7 +88,7 @@ export default {
     },
     async fetchRooms() {
       try {
-        const response = await axios.get('/api/rooms', {
+        const response = await api.get('/api/rooms', {
           headers: { Authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}` },
         });
         this.roomList = response.data;
@@ -111,48 +117,5 @@ async joinRoom(roomId) {
 </script>
 
 <style scoped>
-.room-list {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
-}
-.create-room {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.create-room input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-ul {
-  list-style: none;
-  padding: 0;
-}
-li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-.logout-btn {
-  margin-top: 20px;
-  background-color: #dc3545;
-}
+/* uses global classes from style.css */
 </style>

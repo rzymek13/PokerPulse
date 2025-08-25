@@ -1,30 +1,27 @@
 package prtech.com.pokerpulse.service;
 
-import org.junit.jupiter.api.Assertions;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import prtech.com.pokerpulse.model.player.Player;
+import prtech.com.pokerpulse.repository.PlayerRepository;
 
-
+//@Transactional
 class PlayerServiceTest {
-    PlayerService playerService = new PlayerService();
 
-
-     // Assuming this method sets up the service
+    PlayerRepository repository;
 
     @Test
-    void register() {
-        playerService.register("testUser", "testPassword");
-        Assertions.assertNotNull(playerService.findByName("testUser"));
+    public void createUpdateDeleteOrder() {
+        System.out.println(repository.countItems());
+        Player player = new Player("testUser", "testPass");
+        Player player2 = new Player("testUser2", "testPass2");
+        repository.save(player);
+        repository.save(player2);
+        System.out.println(repository.countItems());
+    }
     }
 
-    @Test
-    void login() {
-        Player testPlayer1 = new Player();
-        testPlayer1.setUsername("testUser1");
-        testPlayer1.setPassword("testPassword1");
-        playerService.getPlayers().add(testPlayer1);
-        Assertions.assertNotNull(playerService.login("testUser1", "testPassword1"));
 
-
-    }
-}

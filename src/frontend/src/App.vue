@@ -4,25 +4,22 @@ import Register from './components/Register.vue';
 </script>
 
 <template>
-  <div>
-    <router-link to="/login" data-testid="home-LoginPage">Logowanie</router-link>
-    <router-link to="/register" data-testid="home-registerPage">Rejestracja</router-link>
-    <router-view></router-view>
-  </div>
+  <div id="app">
+    <nav class="nav">
+      <div class="links">
+        <router-link to="/login" data-testid="home-LoginPage">Logowanie</router-link>
+        <router-link to="/register" data-testid="home-registerPage">Rejestracja</router-link>
+        <router-link to="/roomList">Lobby</router-link>
+      </div>
+      <div style="opacity:.8">PokerPulse</div>
+    </nav>
 
+    <div class="container">
+      <router-view />
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+/**** page-level tweaks if needed ****/
 </style>

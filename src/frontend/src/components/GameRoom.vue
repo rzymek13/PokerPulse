@@ -1,60 +1,52 @@
 <template>
-  <div class="poker-table">
-    <h2>gracz : {{ username }}</h2>
+  <div class="container">
+    <div class="panel" style="margin: 20px auto;">
+      <div class="grid grid-2">
+        <div>
+          <h2>Gracze</h2>
+          <ul class="list">
+            <li class="list-item" v-for="p in players" :key="p.username">
+              <div>
+                <strong>{{ p.username }}</strong>
+                <span v-if="p.username === username && p.hand && p.hand.length" class="label"> — Twoje karty: {{ formatCards(p.hand) }}</span>
+              </div>
+            </li>
+          </ul>
+          <button class="btn btn-success mt-16" v-if="players.length > 1" @click="startGame">Start gry</button>
+        </div>
 
-    <div class="room-status">
-      <h2>Gracze</h2>
-      <ul>
-        <li v-for="p in players" :key="p.username">
-          <label>
-            <input type="checkbox" :checked="p.ready" :disabled="p.username !== username" @change="toggleReady($event.target.checked)" />
-            {{ p.username }} <span v-if="p.username === roomCreator">(twórca)</span>
-          </label>
-          <span v-if="p.username === username && p.hand && p.hand.length"> | Twoje karty: {{ formatCards(p.hand) }}</span>
-        </li>
-      </ul>
-      <button v-if="isCreator && allReady" @click="startGame">Start gry</button>
-    </div>
-
-    <div class="chat">
-      <h2>Czat</h2>
-      <div class="chat-messages">
-        <div v-for="message in chatMessages" :key="message.timestamp">
-          <strong>{{ message.sender && message.sender.username ? message.sender.username : message.username }}:</strong>
-          {{ message.content }}
-          <span class="timestamp">({{ formatDate(message.timestamp) }})</span>
+        <div>
+          <h2>Czat</h2>
+          <div class="chat-box">
+            <div class="chat-messages">
+              <div v-for="message in chatMessages" :key="message.timestamp" style="margin-bottom:6px">
+                <strong>{{ message.sender && message.sender.username ? message.sender.username : message.username }}:</strong>
+                <span> {{ message.content }}</span>
+                <span class="label"> ({{ formatDate(message.timestamp) }})</span>
+              </div>
+            </div>
+            <div class="chat-input">
+              <input class="input" v-model="chatMessage" placeholder="Wpisz wiadomość" @keyup.enter="sendChatMessage" :disabled="isSending" />
+              <button class="btn btn-primary" @click="sendChatMessage" :disabled="isSending || !chatMessage.trim()">Wyślij</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="chat-input">
-        <input
-          v-model="chatMessage"
-          placeholder="Wpisz wiadomość"
-          @keyup.enter="sendChatMessage"
-          :disabled="isSending"
-        />
-        <button @click="sendChatMessage" :disabled="isSending || !chatMessage.trim()">
-          Wyślij
-        </button> 
-      </div>
+
+      <div class="subtitle mt-16">Zalogowano jako: <strong>{{ username }}</strong></div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
+import { SOCKJS_URL } from '../config';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 
 export default {
 
-computed: {
-isCreator() {
-return this.username && this.roomCreator && this.username === this.roomCreator;
-},
-allReady() {
-return this.players.length >= 2 && this.players.every(p => p.ready);
-}
-},
+
 data() {
 return {
 chatMessages: [],
@@ -62,7 +54,6 @@ chatMessages: [],
     username: '',
       roomId: null,
       players: [],
-      roomCreator: null,
       stompClient: null,
       subscription: null,
       isSending: false,
@@ -97,7 +88,6 @@ chatMessages: [],
         try {
           const room = JSON.parse(frame.body);
           this.players = room.players || [];
-          this.roomCreator = room.creatorUsername || null;
         } catch (e) {
           console.error('Nie można sparsować stanu pokoju:', e);
         }
@@ -115,7 +105,7 @@ chatMessages: [],
       };
     } else {
       // Fallback: nowe okno/przeglądarka bez globalnego klienta – utwórz połączenie tutaj.
-      const socket = new SockJS('http://localhost:8080/poker');
+      const socket = new SockJS(SOCKJS_URL);
       const client = new Client({
         webSocketFactory: () => socket,
         reconnectDelay: 5000,
@@ -134,13 +124,13 @@ chatMessages: [],
 
     // Dołącz gracza do pokoju po wejściu (REST)
     try {
-      await axios.post(`/api/rooms/${this.roomId}/join`, this.username, {
+      await api.post(`/api/rooms/${this.roomId}/join`, this.username, {
         headers: { 'Content-Type': 'text/plain; charset=utf-8' },
       });
       // Pobierz stan pokoju
-      const res = await axios.get(`/api/rooms/${this.roomId}`);
+      const res = await api.get(`/api/rooms/${this.roomId}`);
       this.players = res.data.players || [];
-      this.roomCreator = res.data.creatorUsername || null;
+
     } catch (e) {
       console.error('Join/get room failed', e);
     }
@@ -176,14 +166,7 @@ chatMessages: [],
       this.isSending = false;
     }
   },
-  toggleReady(checked) {
-    if (!this.stompClient || !this.stompClient.connected) return;
-    const dto = { username: this.username, ready: !!checked };
-    this.stompClient.publish({
-      destination: `/app/game/${this.roomId}/ready`,
-      body: JSON.stringify(dto),
-    });
-  },
+
   startGame() {
     if (!this.stompClient || !this.stompClient.connected) return;
     const dto = { username: this.username };
@@ -204,83 +187,5 @@ chatMessages: [],
 </script>
 
 <style scoped>
-.poker-table {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.game-info,
-.player-hand {
-  margin-bottom: 20px;
-}
-.actions {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.actions button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.actions button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-.actions input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.chat {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px;
-}
-.chat-messages {
-  max-height: 200px;
-  overflow-y: auto;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #f9f9f9;
-}
-.chat-messages div {
-  margin-bottom: 5px;
-}
-.chat-messages .timestamp {
-  font-size: 0.8em;
-  color: #666;
-}
-.chat-input {
-  display: flex;
-  gap: 10px;
-}
-.chat-input input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.chat-input button {
-  padding: 8px 16px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.chat-input button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-ul {
-  list-style: none;
-  padding: 0;
-}
-li {
-  margin-bottom: 5px;
-}
+/* uses global classes from style.css */
 </style>

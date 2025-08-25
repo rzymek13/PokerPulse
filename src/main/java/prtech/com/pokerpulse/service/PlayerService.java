@@ -1,42 +1,47 @@
 package prtech.com.pokerpulse.service;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import prtech.com.pokerpulse.model.player.Player;
+import prtech.com.pokerpulse.repository.PlayerRepository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
+@Slf4j
 public class PlayerService {
 
-    private final List<Player> players = new ArrayList<>();
+    @Autowired PlayerRepository playerRepository;
+//    List<Player> players = getPlayers();
+
+
 
     public List<Player> getPlayers() {
-        return players;
+        return playerRepository.findAll();
     }
 
     public Player register(String username, String password) {
-        if (players.stream().anyMatch(u -> u.getUsername().equals(username))) {
+        if (playerRepository.findAll().stream().anyMatch(u -> u.getUsername().equals(username)))
+        {
             throw new IllegalArgumentException("Username already exists");
         }
-        Player player = new Player();
-        player.setId(UUID.randomUUID().toString());
-        player.setUsername(username);
-        player.setPassword(password);
-        players.add(player);
-        return player;
+        Player newPlayer = new Player(username, password);
+        playerRepository.save(newPlayer);
+        log.info("Registering new player: {}", newPlayer.getUsername());
+        return newPlayer;
     }
 
     public Player login(String username, String password) {
-        return players.stream()
+        return playerRepository.findAll()
+                .stream()
                 .filter(u -> u.getUsername().equals(username) && u.getPassword().equals(password))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     }
 
     public Player findByName(String username) {
-        return players.stream()
+        return playerRepository.findAll().stream()
                 .filter(u -> u.getUsername().equals(username))
                 .findFirst()
                 .orElse(null);

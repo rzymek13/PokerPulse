@@ -1,6 +1,5 @@
 package prtech.com.pokerpulse.service;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.stereotype.Service;
 
 import prtech.com.pokerpulse.model.card.Card;
@@ -54,36 +53,32 @@ public class GameService {
         }
         return room;
     }
+//
+//    public GameRoom setReady(Integer roomId, String username, boolean ready) {
+//        GameRoom room = getRoomById(roomId);
+//        room.getPlayers().stream()
+//                .filter(p -> p.getUsername().equals(username))
+//                .findFirst()
+//                .ifPresent(p -> p.setReady(ready));
+//        return room;
+//    }
 
-    public GameRoom setReady(Integer roomId, String username, boolean ready) {
-        GameRoom room = getRoomById(roomId);
-        room.getPlayers().stream()
-                .filter(p -> p.getUsername().equals(username))
-                .findFirst()
-                .ifPresent(p -> p.setReady(ready));
-        return room;
-    }
-
-    public GameRoom startGame(Integer roomId, String initiator) {
-        GameRoom room = getRoomById(roomId);
-        if (room.getCreatorUsername() == null || !room.getCreatorUsername().equals(initiator)) {
-            throw new IllegalArgumentException("Only room creator can start the game");
-        }
-        if (room.getPlayers().size() < 2 || !room.getPlayers().stream().allMatch(Player::isReady)) {
-            throw new IllegalArgumentException("Both players must be ready");
-        }
-        // Deal 2 cards to each player from a fresh deck
-        Deck deck = new Deck();
-        List<Card> d = deck.initializeShuffledDeck();
-        int idx = 0;
-        // for (Player p : room.getPlayers()) {
-        //     p.getHand().clear();
-        //     p.getHand().add(d.get(idx++));
-        //     p.getHand().add(d.get(idx++));
-        //     p.setReady(false);
-        // }
-        return room;
-    }
+//    public GameRoom startGame(Integer roomId, String initiator) {
+//        GameRoom room = getRoomById(roomId);
+//        if (room.getPlayers().size() < 2) {
+//            throw new IllegalArgumentException("At least two players required to start");
+//        }
+//        // Deal 2 cards to each player from a fresh deck
+//        Deck deck = new Deck();
+//        List<Card> d = deck.initializeShuffledDeck();
+//        int idx = 0;
+//        for (Player p : room.getPlayers()) {
+//            p.getHand().clear();
+//            p.getHand().add(d.get(idx++));
+//            p.getHand().add(d.get(idx++));
+//        }
+//        return room;
+//    }
 
     public ChatMessage sendMessage(Integer roomId, ChatMessage message) {
         GameRoom room = gameRooms.get(roomId);

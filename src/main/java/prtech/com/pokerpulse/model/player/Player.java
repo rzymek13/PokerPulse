@@ -1,19 +1,30 @@
 package prtech.com.pokerpulse.model.player;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.smartcardio.Card;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import prtech.com.pokerpulse.model.card.Card;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @RequiredArgsConstructor
+@Table("player")
 public class Player {
-    private String id;
+
+    @Id
+    private Long playerId;
     private String username;
     private String password;
-    private boolean ready = false;
-    private List<Card> hand = new ArrayList<>();
+//    private boolean ready = false;
+//    private List<Card> hand = new ArrayList<>();
+
+
+    public Player(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 }
