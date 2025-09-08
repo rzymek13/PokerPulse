@@ -43,7 +43,6 @@ export default {
           username: this.username,
           password: this.password,
         });
-        // Zapamiętaj username (i ewentualnie token, jeśli backend go zwraca) — per tab
         sessionStorage.setItem('username', this.username);
         if (login?.data?.token) {
           sessionStorage.setItem('jwt', login.data.token);
