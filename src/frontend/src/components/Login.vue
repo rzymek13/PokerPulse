@@ -39,7 +39,6 @@ export default {
           password: this.password,
         });
         alert(response.data);
-        // Użyj sessionStorage, aby każdy tab miał własnego użytkownika
         sessionStorage.setItem('username', this.username);
         if (response?.data?.token) {
           sessionStorage.setItem('jwt', response.data.token);

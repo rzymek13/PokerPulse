@@ -20,8 +20,7 @@ public class PokerWebSocketController {
     // Chat (zachowane)
     @MessageMapping("/game/{gameId}/chat")
     public void handleChatMessage(@DestinationVariable Long gameId, @Payload ChatMessage message) {
-        GameRoom room = gameService.getRoomById(gameId.intValue());
-        room.getChatHistory().add(message);
+        gameService.sendMessage(gameId.intValue(), message);
         messagingTemplate.convertAndSend("/topic/room/" + gameId, message);
     }
 

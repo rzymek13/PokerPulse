@@ -8,10 +8,6 @@ import java.util.List;
 
 public interface PlayerRepository extends CrudRepository<Player, Long> {
 
-    // Additional methods specific to PlayerRepository can be added her
-    @Query("select count(*) from players")
-    int countItems();
-
     @Query("select * from player")
     List<Player> findAll();
 }
