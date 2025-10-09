@@ -14,6 +14,7 @@ import java.util.List;
 @CrossOrigin
 @Slf4j
 public class AuthController {
+
     private final PlayerService playerService;
 
     public AuthController(PlayerService playerService) {
@@ -24,14 +25,14 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestBody AuthRequest request) {
 
         Player player = playerService.register(request.getUsername(), request.getPassword());
-        log.info("Registered new player: {}", player.getUsername());
+        log.info("AuthController : Registered new player: {}", player.getUsername());
         return ResponseEntity.ok(player.getUsername() + " registered successfully");
     }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody AuthRequest request) {
         Player player = playerService.login(request.getUsername(), request.getPassword());
-        log.info("Player logged in: {}", player.getUsername());
+        log.info("AuthController : Player logged in: {}", player.getUsername());
         return ResponseEntity.ok(player.getUsername() + " logged in successfully");
     }
 

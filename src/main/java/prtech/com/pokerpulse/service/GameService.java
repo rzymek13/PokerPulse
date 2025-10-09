@@ -1,5 +1,6 @@
 package prtech.com.pokerpulse.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,27 +16,30 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 public class GameService {
 
     @Autowired GameRoomRepository repository;
 
     public List<GameRoom> getAllRooms() {
-        return ((List<GameRoom>) repository.findAll());
+        return repository.findAll();
     }
+    //zrob porzadnie graczy i pokoje
 
-    public GameRoom getRoomById(Integer roomId) {
+    public GameRoom getRoomById(Long roomId) {
         return repository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room with ID " + roomId + " not found"));
     }
 
     public GameRoom createRoom(String roomName) {
-        GameRoom room = new GameRoom();
-        room.setRoomName(roomName);
+        GameRoom room = new GameRoom(roomName);
+
         repository.save(room);
+        log.info("GameService  :  Creating new room: {}", roomName);
         return room;
     }
 
-    public GameRoom joinRoom(Integer roomId, Player player) {
+    public GameRoom joinRoom(Long roomId, Player player) {
         GameRoom room = repository.findByRoomId(roomId);
         if (room == null) {
             throw new IllegalArgumentException("Room not found");
@@ -45,7 +49,7 @@ public class GameService {
         if (!exists) {
             room.getPlayers().add(player);
         }
-        repository.save(room);
+//        repository.save(room);
         return room;
     }
 //
@@ -75,12 +79,13 @@ public class GameService {
 //        return room;
 //    }
 
-    public ChatMessage sendMessage(Integer roomId, ChatMessage message) {
+    public ChatMessage sendMessage(Long roomId, ChatMessage message) {
         GameRoom room = repository.findByRoomId(roomId);
         if (room == null) {
             throw new IllegalArgumentException("Room not found");
         }
         room.getChatHistory().add(message);
+        log.info(" Game Service : Message sent in room {}: {}", roomId, message.getContent());
         return message;
     }
 }

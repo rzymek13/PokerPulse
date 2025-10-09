@@ -15,12 +15,12 @@
       </div>
 
       <ul class="list mt-16" v-if="roomList.length">
-        <li class="list-item" v-for="room in roomList" :key="room.roomId">
+        <li class="list-item" v-for="room in roomList" :key="room.gameRoomId">
           <div>
             <strong>{{ room.roomName }}</strong>
-            <div class="label">ID: {{ room.roomId }}</div>
+            <div class="label">ID: {{ room.gameRoomId }}</div>
           </div>
-          <button class="btn" @click="joinRoom(room.roomId)" :disabled="isJoining">Dołącz</button>
+          <button class="btn" @click="joinRoom(room.gameRoomId)" :disabled="isJoining">Dołącz</button>
         </li>
       </ul>
       <p v-else class="label mt-16">Brak dostępnych pokoi.</p>
@@ -94,7 +94,7 @@ export default {
         this.roomList = response.data;
         // Logowanie dla debugowania
         this.roomList.forEach((room) =>
-          console.log(`Pokój: ${room.roomName} (ID: ${room.roomId})`)
+          console.log(`Pokój: ${room.roomName} (ID: ${room.gameRoomId})`)
         );
       } catch (error) {
         alert(
@@ -104,9 +104,11 @@ export default {
       }
     },
 async joinRoom(roomId) {
+  console.log('joinRoom arg:', roomId); // tymczasowy log
   this.isJoining = true;
   try {
     sessionStorage.setItem('roomId', String(roomId));
+    console.log(roomId)
     this.$router.push('/GameRoom');
   } finally {
     this.isJoining = false;

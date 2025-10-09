@@ -51,7 +51,7 @@ data() {
 return {
 chatMessages: [],
   chatMessage: '',
-    username: '',
+    
       roomId: null,
       players: [],
       stompClient: null,
@@ -61,7 +61,7 @@ chatMessages: [],
   },
   async mounted() {
     this.username = sessionStorage.getItem('username') || '';
-    this.roomId = this.$route.params.id || sessionStorage.getItem('roomId');
+    this.roomId = sessionStorage.getItem('roomId');
     console.log(`roomId: ${this.roomId}`);
     this.stompClient = window.stompClient;
 
@@ -75,6 +75,8 @@ chatMessages: [],
       this.subscription = this.stompClient.subscribe(`/topic/room/${this.roomId}`, (frame) => {
         try {
           const msg = JSON.parse(frame.body);
+          console.log('Received chat message:', msg);
+          console.log('Room data', this.roomId);
           if (!msg.sender && msg.username) {
             msg.sender = { username: msg.username };
           }
@@ -124,6 +126,8 @@ chatMessages: [],
 
     // Dołącz gracza do pokoju po wejściu (REST)
     try {
+      console.log('już w pokoju?', this.roomId);
+      console.log('już w pokoju gracz - ', this.username);
       await api.post(`/api/rooms/${this.roomId}/join`, this.username, {
         headers: { 'Content-Type': 'text/plain; charset=utf-8' },
       });

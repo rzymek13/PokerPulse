@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface PlayerRepository extends CrudRepository<Player, Long> {
 
-    @Query("select * from player")
+    @Query("select * from players")
     List<Player> findAll();
 }

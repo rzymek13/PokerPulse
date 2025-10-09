@@ -5,10 +5,15 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import prtech.com.pokerpulse.model.room.GameRoom;
 
+import java.util.List;
+
 @Repository
-public interface GameRoomRepository extends CrudRepository<GameRoom, Integer> {
-    @Query("select * from game_room where room_id = :roomId")
-    GameRoom findByRoomId(Integer roomId);
+public interface GameRoomRepository extends CrudRepository<GameRoom, Long> {
+    @Query("select * from game_rooms where game_room_id = :roomId")
+    GameRoom findByRoomId(Long roomId);
+
+    @Query("select * from game_rooms")
+    List<GameRoom> findAll();
 
     GameRoom save(String roomName);
 }

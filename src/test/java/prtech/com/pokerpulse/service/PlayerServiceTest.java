@@ -3,6 +3,7 @@ package prtech.com.pokerpulse.service;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.hasSize;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Slf4j
 class PlayerServiceTest {
 
     @LocalServerPort
@@ -60,6 +62,8 @@ class PlayerServiceTest {
                 new Player("user2", "pass2")
         );
         repository.saveAll(players);
+        log.info("Saved players: {}", repository.findAll());
+
 
         given()
                 .contentType(ContentType.JSON)

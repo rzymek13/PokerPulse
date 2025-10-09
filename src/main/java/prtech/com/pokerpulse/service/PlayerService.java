@@ -28,7 +28,7 @@ public class PlayerService {
         }
         Player newPlayer = new Player(username, password);
         playerRepository.save(newPlayer);
-        log.info("Registering new player: {}", newPlayer.getUsername());
+        log.info("PlayerService  : Registering new player: {}", newPlayer.getUsername());
         return newPlayer;
     }
 

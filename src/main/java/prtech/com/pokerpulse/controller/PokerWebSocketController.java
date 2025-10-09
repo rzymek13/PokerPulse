@@ -1,5 +1,6 @@
 package prtech.com.pokerpulse.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -11,6 +12,7 @@ import prtech.com.pokerpulse.model.room.GameRoom;
 import prtech.com.pokerpulse.service.GameService;
 
 @Controller
+@Slf4j
 public class PokerWebSocketController {
     @Autowired
     private GameService gameService;
@@ -20,7 +22,8 @@ public class PokerWebSocketController {
     // Chat (zachowane)
     @MessageMapping("/game/{gameId}/chat")
     public void handleChatMessage(@DestinationVariable Long gameId, @Payload ChatMessage message) {
-        gameService.sendMessage(gameId.intValue(), message);
+        gameService.sendMessage(gameId, message);
+        log.info("PokerWebSocketController : Message sent in game {}: {}", gameId, message.getContent());
         messagingTemplate.convertAndSend("/topic/room/" + gameId, message);
     }
 

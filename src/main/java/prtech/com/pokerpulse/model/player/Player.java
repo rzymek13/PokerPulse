@@ -3,21 +3,17 @@ package prtech.com.pokerpulse.model.player;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import prtech.com.pokerpulse.model.card.Card;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @RequiredArgsConstructor
-@Table("player")
+@Table("players")
 public class Player {
 
-    @Id
-    private Long playerId;
-    private String username;
-    private String password;
+    @Id @Column("player_id") private Long playerId;
+    @Column("username") private String username;
+    @Column("password") private String password;
 //    private boolean ready = false;
 //    private List<Card> hand = new ArrayList<>();
 

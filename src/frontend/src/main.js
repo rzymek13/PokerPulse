@@ -13,6 +13,7 @@ const routes = [
     { path: '/login', component: Login },
     { path: '/register', component: Register },
     { path: '/roomList', component: RoomList },
+  { path: '/gameRoom/:id', name: 'gameRoom', component: GameRoom, props: true },
     { path: '/gameRoom', component: GameRoom }
 ];
 
