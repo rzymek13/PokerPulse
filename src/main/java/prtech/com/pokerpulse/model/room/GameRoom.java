@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+import prtech.com.pokerpulse.model.game.Hand;
 import prtech.com.pokerpulse.model.player.Player;
 import prtech.com.pokerpulse.model.chat.ChatMessage;
 
@@ -28,6 +29,8 @@ public class GameRoom {
     private List<Player> players = new ArrayList<>();
     @Transient
     private List<ChatMessage> chatHistory = new ArrayList<>();
+    @Transient
+    private List<Hand> hands = new ArrayList<>();
 
 //    private PokerGame game;
 
@@ -37,6 +40,16 @@ public class GameRoom {
         this.roomName = roomName;
     }
 
+    @Override
+    public String toString() {
+        return "GameRoom{" +
+                "gameRoomId=" + gameRoomId +
+                ", roomName='" + roomName + '\'' +
+                ", players=" + players +
+                ", chatHistory=" + chatHistory +
+                ", hands=" + hands +
+                '}';
+    }
 }
 
 

@@ -4,16 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import prtech.com.pokerpulse.model.card.Card;
-import prtech.com.pokerpulse.model.card.Deck;
 import prtech.com.pokerpulse.model.chat.ChatMessage;
+import prtech.com.pokerpulse.model.game.Hand;
 import prtech.com.pokerpulse.model.player.Player;
 import prtech.com.pokerpulse.model.room.GameRoom;
 import prtech.com.pokerpulse.repository.GameRoomRepository;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -62,22 +59,17 @@ public class GameService {
 //        return room;
 //    }
 
-//    public GameRoom startGame(Integer roomId, String initiator) {
-//        GameRoom room = getRoomById(roomId);
+    public GameRoom startGame(Long roomId) {
+        GameRoom room = getRoomById(roomId);
 //        if (room.getPlayers().size() < 2) {
 //            throw new IllegalArgumentException("At least two players required to start");
 //        }
-//        // Deal 2 cards to each player from a fresh deck
-//        Deck deck = new Deck();
-//        List<Card> d = deck.initializeShuffledDeck();
-//        int idx = 0;
-//        for (Player p : room.getPlayers()) {
-//            p.getHand().clear();
-//            p.getHand().add(d.get(idx++));
-//            p.getHand().add(d.get(idx++));
-//        }
-//        return room;
-//    }
+        // Deal 2 cards to each player from a fresh deck
+        Hand hand = new Hand(room.getPlayers());
+        log.info("room", room);
+        log.info("hand", hand);
+        return room;
+    }
 
     public ChatMessage sendMessage(Long roomId, ChatMessage message) {
         GameRoom room = repository.findByRoomId(roomId);
