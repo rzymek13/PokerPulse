@@ -5,48 +5,67 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import prtech.com.pokerpulse.model.chat.ChatMessage;
 import prtech.com.pokerpulse.model.room.GameRoom;
 import prtech.com.pokerpulse.service.GameService;
 
 @Controller
 @Slf4j
+@CrossOrigin
 public class PokerWebSocketController {
-    @Autowired
-    private GameService gameService;
+
+
+    private final GameService gameService;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    // Chat (zachowane)
-    @MessageMapping("/game/{gameId}/chat")
-    public void handleChatMessage(@DestinationVariable Long gameId, @Payload ChatMessage message) {
-        gameService.sendMessage(gameId, message);
-        log.info("PokerWebSocketController : Message sent in game {}: {}", gameId, message.getContent());
-        messagingTemplate.convertAndSend("/topic/room/" + gameId, message);
+    public PokerWebSocketController(GameService gameService) {
+        this.gameService = gameService;
     }
 
-    // Ready toggle
-    public static class ReadyDTO {
-        public String username;
-        public boolean ready;
+    @MessageMapping("/chat/{roomId}")
+    @SendTo("/topic/room/{roomId}")
+    public ChatMessage sendMessage(@DestinationVariable Long roomId, @Payload ChatMessage message) {
+        GameRoom room = gameService.getRooms().get(roomId);
+        room.getChatHistory().add(message);
+        log.info("wiadomość wysłana przez PokerWebSocketController: {} w pokoju :{}", message.getContent(), roomId);
+        return message;
     }
-
-//    @MessageMapping("/game/{gameId}/ready")
-//    public void handleReady(@DestinationVariable Long gameId, @Payload ReadyDTO dto) {
-//        GameRoom room = gameService.setReady(gameId.intValue(), dto.username, dto.ready);
-//        messagingTemplate.convertAndSend("/topic/room/" + gameId + "/state", room);
-//    }
-
-    // Start game
-    public static class StartDTO {
-        public String username;
+    @MessageMapping("/game/{roomId}/{playerId}")
+    @SendTo("/topic/game/{playerId}")
+    public GameRoom blabla(@DestinationVariable Long roomId, @DestinationVariable Long playerId){
+        GameRoom room = gameService.getRooms().get(roomId);
+        gameService.startGame(roomId);
+        log.info("Aktualizacja gry dla gracza: {} w pokoju :{}", playerId, roomId);
+        return room;
     }
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //prywatne karty gracza - wysyłane tylko do niego
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
-//    @MessageMapping("/game/{gameId}/start")
-//    public void handleStart(@DestinationVariable Long gameId, @Payload StartDTO dto) {
-//        GameRoom room = gameService.startGame(gameId.intValue(), dto.username);
-//        messagingTemplate.convertAndSend("/topic/room/" + gameId + "/state", room);
-//    }
 }

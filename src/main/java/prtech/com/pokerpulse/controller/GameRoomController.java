@@ -4,11 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import prtech.com.pokerpulse.model.player.Player;
 import prtech.com.pokerpulse.model.room.GameRoom;
 import prtech.com.pokerpulse.service.GameService;
 import jakarta.validation.constraints.NotBlank;
-import prtech.com.pokerpulse.service.PlayerService;
 
 
 import java.util.List;
@@ -19,21 +17,29 @@ import java.util.List;
 @Slf4j
 public class GameRoomController {
     private final GameService gameService;
-    private final PlayerService playerService;
 
-    public GameRoomController(GameService gameService, PlayerService playerService) {
+    public GameRoomController(GameService gameService) {
         this.gameService = gameService;
-        this.playerService = playerService;
     }
 
     @GetMapping
     public ResponseEntity<List<GameRoom>> getRooms() {
+        log.info("GameRoomController : Fetching all game rooms from database{}",gameService.getAllRooms());
         return ResponseEntity.ok(gameService.getAllRooms());
+    }
+    @GetMapping("/memory")
+    public ResponseEntity<List<GameRoom>> getRoomsFromMem() {
+        log.info("GameRoomController : Fetching all game rooms from memory{}",gameService.getRooms());
+        return ResponseEntity.ok(gameService.getRooms().values().stream().toList());
     }
 
     @GetMapping("/{roomId}")
     public ResponseEntity<GameRoom> getRoom(@PathVariable Long roomId) {
         return ResponseEntity.ok(gameService.getRoomById(roomId));
+    }
+    @GetMapping("/memory/{roomId}")
+    public ResponseEntity<GameRoom> getRoomFromMem(@PathVariable Long roomId) {
+        return ResponseEntity.ok(gameService.getRooms().get(roomId));
     }
 
     @PostMapping
@@ -42,11 +48,17 @@ public class GameRoomController {
         log.info("GameRoomController : Room created: {}", roomName);
         return ResponseEntity.ok(room);
     }
+    @DeleteMapping("/{roomId}")
+    public ResponseEntity<String> deleteRoom(@PathVariable Long roomId) {
+        gameService.deleteRoom(roomId);
+        log.info("GameRoomController : Room deleted: {}", roomId);
+        return ResponseEntity.ok("Room deleted successfully");
+    }
 
     @PostMapping("/{roomId}/join")
     public ResponseEntity<GameRoom> joinRoom(@PathVariable Long roomId, @RequestBody @NotBlank String username) {
-        Player player = playerService.findByName(username);
-        GameRoom room = gameService.joinRoom(roomId, player);
+        GameRoom room = gameService.joinRoom(roomId, username);
+        log.info("GameRoomController : Player {} is attempting to join room {}", username, roomId);
         return ResponseEntity.ok(room);
     }
 }

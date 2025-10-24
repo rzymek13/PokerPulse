@@ -104,6 +104,20 @@ export default {
       }
     },
 async joinRoom(roomId) {
+
+//
+//
+//
+//
+
+////
+
+// poprawic to
+//
+
+//
+
+////
   console.log('joinRoom arg:', roomId); // tymczasowy log
   this.isJoining = true;
   try {

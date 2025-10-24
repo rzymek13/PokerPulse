@@ -12,4 +12,8 @@ public interface PlayerRepository extends CrudRepository<Player, Long> {
 
     @Query("select * from players")
     List<Player> findAll();
+
+    void deleteById(Long playerId);
+
+
 }

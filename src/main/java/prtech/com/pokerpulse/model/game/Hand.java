@@ -8,13 +8,14 @@ import prtech.com.pokerpulse.model.player.Player;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 public class Hand {
     private String id;
     private List<Card> deck = initializeShuffledDeck();
-    private List<Card> communityCards = new ArrayList<>();
-    private Map<Player, List<Card>> playerHands = new HashMap<>();
+    private List<Card> communityCards;
+    private Map<Player, List<Card>> playerHands;
     private int pot = 0;
     private String stage = "PREFLOP";
     private Player currentPlayer;
@@ -34,17 +35,16 @@ public class Hand {
             throw new IllegalArgumentException("At least two players are required to start a hand.");
         }
         this.id = UUID.randomUUID().toString();
-        this.communityCards.addAll(deck.subList(0, 5));
-        deck.subList(0, 5).clear();
+        this.communityCards = Stream.generate(() -> deck.remove(0))
+                .limit(5)
+                .collect(Collectors.toCollection(ArrayList::new));
+
         this.playerHands = players.stream()
                 .collect(Collectors.toMap(
                         player -> player,
-                        player -> {
-                            List<Card> hand = new ArrayList<>();
-                            hand.add(deck.remove(0));
-                            hand.add(deck.remove(0));
-                            return hand;
-                        }
+                        player -> Stream.generate(() -> deck.remove(0))
+                                .limit(2)
+                                .collect(Collectors.toCollection(ArrayList::new))
                 ));
     }
 

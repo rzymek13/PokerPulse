@@ -5,14 +5,20 @@
         <div>
           <h2>Gracze</h2>
           <ul class="list">
-            <li class="list-item" v-for="p in players" :key="p.username">
+            <li class="list-item" v-for="p in players" :key="p.playerId || p.username">
               <div>
                 <strong>{{ p.username }}</strong>
                 <span v-if="p.username === username && p.hand && p.hand.length" class="label"> — Twoje karty: {{ formatCards(p.hand) }}</span>
               </div>
             </li>
           </ul>
+          <p v-if="!players || players.length === 0" class="label mt-8">Brak graczy w pokoju.</p>
+          <!-- Dev debug: show players data if needed -->
+          <pre v-if="players && players.length === 0" style="margin-top:8px; background:#f7f7f7; padding:8px; font-size:12px">{{ JSON.stringify(players, null, 2) }}</pre>
+          <!-- Test/start button: visible when there are at least 2 players -->
           <button class="btn btn-success mt-16" v-if="players.length > 1" @click="startGame">Start gry</button>
+          <!-- Temporary always-visible test button (remove when ready) -->
+          <button class="btn btn-warning mt-8" @click="startGame">Start gry (test)</button>
         </div>
 
         <div>
@@ -47,20 +53,23 @@ import { Client } from '@stomp/stompjs';
 export default {
 
 
-data() {
-return {
-chatMessages: [],
-  chatMessage: '',
-    
+  data() {
+    return {
+      username: sessionStorage.getItem('username') || '',
+      chatMessages: [],
+      chatMessage: '',
+
       roomId: null,
       players: [],
       stompClient: null,
       subscription: null,
+      gameSubscription: null,
       isSending: false,
     };
   },
   async mounted() {
     this.username = sessionStorage.getItem('username') || '';
+
     this.roomId = sessionStorage.getItem('roomId');
     console.log(`roomId: ${this.roomId}`);
     this.stompClient = window.stompClient;
@@ -85,15 +94,7 @@ chatMessages: [],
           console.error('Nie można sparsować wiadomości czatu:', e);
         }
       });
-      // room state
-      this.stompClient.subscribe(`/topic/room/${this.roomId}/state`, (frame) => {
-        try {
-          const room = JSON.parse(frame.body);
-          this.players = room.players || [];
-        } catch (e) {
-          console.error('Nie można sparsować stanu pokoju:', e);
-        }
-      });
+      // Note: subscribing to player-specific game topic is done after we know player's id
     };
 
     if (this.stompClient && this.stompClient.connected) {
@@ -117,6 +118,7 @@ chatMessages: [],
         this.stompClient = client;
         window.stompClient = client;
         subscribeToRoom();
+        // game subscription will be attempted after we fetch players
       };
       client.onStompError = (error) => console.error('WebSocket error:', error);
       client.activate();
@@ -132,8 +134,12 @@ chatMessages: [],
         headers: { 'Content-Type': 'text/plain; charset=utf-8' },
       });
       // Pobierz stan pokoju
-      const res = await api.get(`/api/rooms/${this.roomId}`);
-      this.players = res.data.players || [];
+    const res = await api.get(`/api/rooms/memory/${this.roomId}`);
+    console.log('GET /api/rooms response:', res.data);
+    this.players = this.normalizePlayers(res.data.players || []);
+
+  // Subscribe to game updates for this player (server sends to /topic/game/{playerId})
+  this.ensureGameSubscription();
 
     } catch (e) {
       console.error('Join/get room failed', e);
@@ -144,9 +150,54 @@ chatMessages: [],
       try { this.subscription.unsubscribe(); } catch (_) {}
       this.subscription = null;
     }
+    if (this.gameSubscription) {
+      try { this.gameSubscription.unsubscribe(); } catch (_) {}
+      this.gameSubscription = null;
+    }
     // Nie dezaktywujemy klienta globalnego – inne ekrany mogą go używać
   },
   methods: {
+  // Normalize player objects from backend to ensure consistent fields (playerId, username)
+  normalizePlayers(players) {
+    return players.map(p => {
+      // backend may return different casing or nested structures
+      const playerId = p.playerId || p.player_id || p.id || p.playerID || null;
+      const username = p.username || p.name || (p.player && p.player.username) || '';
+      const hand = p.hand || p.cards || p.playerHand || [];
+      return { ...p, playerId, username, hand };
+    });
+  },
+
+  // Subscribe to /topic/game/{playerId} when we have a playerId for current user
+  ensureGameSubscription() {
+    const me = this.players.find(p => p.username === this.username || p.playerId && String(p.playerId) === String(this.username));
+    const playerId = me && me.playerId;
+    if (!playerId) {
+      console.log('ensureGameSubscription: playerId not found yet');
+      return;
+    }
+    if (!this.stompClient || !this.stompClient.connected) {
+      console.log('ensureGameSubscription: stomp client not connected yet');
+      return;
+    }
+    try {
+      if (this.gameSubscription) {
+        try { this.gameSubscription.unsubscribe(); } catch (_) {}
+        this.gameSubscription = null;
+      }
+      this.gameSubscription = this.stompClient.subscribe(`/topic/game/${playerId}`, (frame) => {
+        try {
+          const room = JSON.parse(frame.body);
+          this.players = this.normalizePlayers(room.players || []);
+        } catch (e) {
+          console.error('Nie można sparsować stanu pokoju (game update):', e);
+        }
+      });
+      console.log(`Subscribed to /topic/game/${playerId}`);
+    } catch (e) {
+      console.error('Failed to subscribe to player game topic:', e);
+    }
+  },
   sendChatMessage() {
     if (!this.chatMessage.trim()) return;
     if (!this.stompClient || !this.stompClient.connected) {
@@ -172,12 +223,43 @@ chatMessages: [],
   },
 
   startGame() {
-    if (!this.stompClient || !this.stompClient.connected) return;
-    const dto = { username: this.username };
-    this.stompClient.publish({
-      destination: `/app/game/${this.roomId}/start`,
-      body: JSON.stringify(dto),
-    });
+    // Find the playerId for the current user
+    const me = this.players.find(p => p.username === this.username);
+    const playerId = me && (me.playerId || me.player_id || me.id || me.playerID);
+
+    if (!this.stompClient || !this.stompClient.connected) {
+      console.warn('STOMP client not connected - cannot start game');
+      alert('Połączenie z serwerem nie jest aktywne. Spróbuj ponownie.');
+      return;
+    }
+
+    if (!playerId) {
+      // Backend expects playerId path variable; if we don't have it, try to request start without it
+      console.warn('Nie znaleziono playerId dla użytkownika. Próba użycia alternatywnego endpointu.');
+      // As a fallback, call the REST API to start the game (if implemented) or notify user
+      // Here we try to publish to the room-level start endpoint if server supports it
+      try {
+        this.stompClient.publish({
+          destination: `/app/game/${this.roomId}/0`,
+          body: JSON.stringify({ username: this.username }),
+        });
+        console.log('Wysłano żądanie startu gry (fallback)');
+      } catch (e) {
+        console.error('Błąd wysyłania startGame (fallback):', e);
+      }
+      return;
+    }
+
+    try {
+      // Backend mapping: @MessageMapping("/game/{roomId}/{playerId}")
+      this.stompClient.publish({
+        destination: `/app/game/${this.roomId}/${playerId}`,
+        body: null,
+      });
+      console.log(`Requested startGame for room ${this.roomId} player ${playerId}`);
+    } catch (e) {
+      console.error('startGame publish failed', e);
+    }
   },
   formatDate(timestamp) {
     const date = new Date(timestamp);

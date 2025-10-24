@@ -44,10 +44,10 @@ public class GameRoom {
     public String toString() {
         return "GameRoom{" +
                 "gameRoomId=" + gameRoomId +
-                ", roomName='" + roomName + '\'' +
-                ", players=" + players +
-                ", chatHistory=" + chatHistory +
-                ", hands=" + hands +
+                "\n" +  ", roomName='" + roomName + '\'' +
+                "\n" +  ", players=" + players +
+                "\n" + ", chatHistory=" + chatHistory +
+                "\n" + ", hands=" + hands +
                 '}';
     }
 }
