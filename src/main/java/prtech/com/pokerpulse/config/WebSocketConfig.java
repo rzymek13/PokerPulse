@@ -17,7 +17,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/poker")
+        // natywny WebSocket (bez SockJS) - przydatne do testów z Postmanem / czystymi klientami WebSocket
+        registry.addEndpoint("/test-ws")
+                .setAllowedOriginPatterns("*");
+
+        // endpoint z SockJS (pozostawiamy dla frontendu który może z niego korzystać)
+        registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }

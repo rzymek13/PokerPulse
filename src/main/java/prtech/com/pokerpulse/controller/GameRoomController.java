@@ -61,4 +61,25 @@ public class GameRoomController {
         log.info("GameRoomController : Player {} is attempting to join room {}", username, roomId);
         return ResponseEntity.ok(room);
     }
+
+    @PostMapping("/{roomId}/leave")
+    public ResponseEntity<GameRoom> leaveRoom(@PathVariable Long roomId,  @RequestBody @NotBlank String username) {
+        GameRoom room = gameService.leaveRoom(roomId, username);
+        log.info("GameRoomController : Player {} is attempting to leave room {}", username, roomId);
+        return ResponseEntity.ok(room);
+    }
+
+    @PostMapping("/{roomId}/start")
+    public ResponseEntity<GameRoom> startRoom(@PathVariable Long roomId) {
+        GameRoom room = gameService.startGame(roomId);
+        log.info("GameRoomController : Started game for room {}", roomId);
+        return ResponseEntity.ok(room);
+    }
+
+    @GetMapping("/{roomId}/{playerId}/privateCards")
+    public ResponseEntity<List<?>> getPrivateCards(@PathVariable Long roomId, @PathVariable Long playerId) {
+        List<?> privateCards = gameService.dealPrivateCards(roomId, playerId);
+        log.info("GameRoomController : Fetching private cards for player {} in room {}", playerId, roomId);
+        return ResponseEntity.ok(privateCards);
+    }
 }

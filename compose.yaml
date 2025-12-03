@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17.1
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pokerpulse_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 'Rzymek13!'
+    ports:
+      - "5432:5432"
+    volumes:
+      - pokerpulse_newdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  app:
+    build: .
+    container_name: poker-app
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pokerpulse_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 'Rzymek13!'
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+volumes:
+  pokerpulse_newdata:
+    driver: local
