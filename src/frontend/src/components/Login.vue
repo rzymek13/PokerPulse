@@ -45,7 +45,7 @@ export default {
         } else if (response?.data?.jwt) {
           sessionStorage.setItem('jwt', response.data.jwt);
         }
-        this.$router.push('/RoomList'); 
+        this.$router.push('/roomList'); 
       } catch (error) {
         alert('Błąd logowania: ' + error.response.data.message);
       }

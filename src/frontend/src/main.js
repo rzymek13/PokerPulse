@@ -7,14 +7,17 @@ import Register from './components/Register.vue';
 import RoomList from './components/RoomList.vue';
 import GameRoom from './components/GameRoom.vue';
 import Home from './components/Home.vue';
+import PanRoom from './components/PanRoom.vue';
 
 const routes = [
     { path: '/', component: Home },
-    { path: '/login', component: Login },
-    { path: '/register', component: Register },
+    { path: '/login', component: Login, alias: '/Login' },
+    { path: '/register', component: Register, alias: '/Register' },
     { path: '/roomList', component: RoomList },
-  { path: '/gameRoom/:id', name: 'gameRoom', component: GameRoom, props: true },
-    { path: '/gameRoom', component: GameRoom }
+    { path: '/gameRoom/:id', name: 'gameRoom', component: GameRoom, props: true },
+    { path: '/gameRoom', component: GameRoom },
+    { path: '/panRoom/:id', name: 'panRoom', component: PanRoom, props: true },
+    { path: '/panRoom', component: PanRoom },
 ];
 
 const router = createRouter({

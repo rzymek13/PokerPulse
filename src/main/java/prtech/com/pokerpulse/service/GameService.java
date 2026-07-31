@@ -116,18 +116,14 @@ public class GameService {
     }
 
     public GameRoom joinRoom(Long roomId, String username) {
-
-        if (getPlayerByUsername(username) == null) {
-            throw new IllegalArgumentException("Player not found");
-        }
         Player player = getPlayerByUsername(username);
-        if (rooms.get(roomId).getPlayers().contains(player)) {
+        GameRoom room = rooms.computeIfAbsent(roomId, this::getRoomById);
+        if (room.getPlayers().contains(player)) {
             throw new IllegalArgumentException("Player already in room");
         }
-        if (getRoomById(roomId) == null) {
-            throw new IllegalArgumentException("Room not found");
+        if (room.getPlayers().size() >= 4) {
+            throw new IllegalArgumentException("Pan room can contain at most 4 players");
         }
-        GameRoom room = rooms.get(roomId);
 
         room.getPlayers().add(player);
         log.info("Game Service : Player {} joined room {}", username, roomId);
@@ -140,10 +136,7 @@ public class GameService {
             throw new IllegalArgumentException("Player not found");
         }
         Player player = getPlayerByUsername(username);
-        if (getRoomById(roomId) == null) {
-            throw new IllegalArgumentException("Room not found");
-        }
-        GameRoom room = rooms.get(roomId);
+        GameRoom room = rooms.computeIfAbsent(roomId, this::getRoomById);
         if (!room.getPlayers().contains(player)) {
             throw new IllegalArgumentException("Player not in room");
         }

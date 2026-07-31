@@ -65,8 +65,10 @@ a:hover { opacity: .9; }
   background: radial-gradient(800px 300px at 0% -20%, rgba(20,30,50,0.06) 0%, transparent 50%), rgba(12,16,28,0.02);
 }
 
-.room-page .left-panel, .game-page .left-panel { flex: 0 0 33%; max-width: 36%; }
-.room-page .right-main, .game-page .right-main { flex: 1 1 64%; }
+.room-page .left-panel { flex: 0 0 42%; max-width: 46%; }
+.room-page .right-main { flex: 1 1 54%; }
+.game-page .left-panel { flex: 0 0 33%; max-width: 36%; }
+.game-page .right-main { flex: 1 1 64%; }
 
 /* Game page layout: top players strip, centered board, right-side chat */
 .game-page .top-players { width: 100%; }
@@ -112,6 +114,7 @@ a:hover { opacity: .9; }
 .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #0b1120; border-color: transparent; font-weight: 600; }
 .btn-danger { background: #2a0f15; border-color: #4c1d1f; color: #fecaca; }
 .btn-success { background: #0f2a18; border-color: #1f4c2a; color: #bbf7d0; }
+.btn-warning { background: #2e2408; border-color: #6b4f15; color: #fde68a; }
 
 /* Lists */
 .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
@@ -119,6 +122,27 @@ a:hover { opacity: .9; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
   background: #0a0f24;
+}
+
+.room-page .list-item {
+  align-items: flex-start;
+}
+
+.room-page .list-item > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.room-page .list-item strong {
+  max-width: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.room-page .list-item > div:last-child {
+  flex: 0 0 auto;
+  margin-left: 12px;
 }
 
 /* Grid helpers */

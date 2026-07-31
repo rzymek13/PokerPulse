@@ -49,7 +49,7 @@ export default {
         } else if (login?.data?.jwt) {
           sessionStorage.setItem('jwt', login.data.jwt);
         }
-        this.$router.push('/RoomList'); 
+        this.$router.push('/roomList'); 
       } catch (error) {
         alert('Błąd rejestracji: ' + error.response.data.message);
       }

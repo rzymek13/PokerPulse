@@ -89,7 +89,7 @@ async function joinRoom(roomId) {
   isJoining.value = true;
   try {
     sessionStorage.setItem('roomId', String(roomId));
-    await router.push('/GameRoom/' + roomId);
+    await router.push('/panRoom/' + roomId);
   } finally { isJoining.value = false; }
 }
 

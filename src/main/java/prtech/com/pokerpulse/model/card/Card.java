@@ -15,4 +15,8 @@ public class Card {
         return  "((rank=" + rank.getSymbol() +
                 " suit=" + suit.getSymbol()+"))";
     }
+
+    public String getCode() {
+        return rank.getSymbol() + suit.getSymbol();
+    }
 }
