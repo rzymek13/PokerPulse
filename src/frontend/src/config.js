@@ -1,4 +1,6 @@
- export const API_BASE = 'https://pokerpulse-1755702196433.azurewebsites.net';
-//export const API_BASE = 'http://localhost:8080'
+const productionApiBase = 'https://pokerpulse-cya3hygchtejgzhc.polandcentral-01.azurewebsites.net';
+
+export const API_BASE = import.meta.env.VITE_API_BASE
+  ?? (import.meta.env.DEV ? 'http://localhost:8080' : productionApiBase);
 
 export const SOCKJS_URL = `${API_BASE}/ws`;
