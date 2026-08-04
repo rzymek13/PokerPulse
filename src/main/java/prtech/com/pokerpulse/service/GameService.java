@@ -11,7 +11,7 @@ import prtech.com.pokerpulse.model.chat.ChatMessage;
 import prtech.com.pokerpulse.model.game.Hand;
 import prtech.com.pokerpulse.model.player.Player;
 import prtech.com.pokerpulse.model.room.GameRoom;
-import prtech.com.pokerpulse.repository.TableStorageRepository;
+import prtech.com.pokerpulse.repository.PersistenceRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameService {
 
     @Autowired
-    TableStorageRepository tableStorageRepository;
+    PersistenceRepository tableStorageRepository;
 
     Map<Long, GameRoom> rooms = new ConcurrentHashMap<>();
 

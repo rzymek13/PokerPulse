@@ -6,6 +6,7 @@ import com.azure.data.tables.models.TableEntity;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Profile;
 import prtech.com.pokerpulse.model.player.Player;
 import prtech.com.pokerpulse.model.room.GameRoom;
 
@@ -14,7 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
 @Repository
-public class TableStorageRepository {
+@Profile("!local")
+public class TableStorageRepository implements PersistenceRepository {
     private final TableClient users;
     private final TableClient rooms;
     private final AtomicLong ids = new AtomicLong(System.currentTimeMillis());
