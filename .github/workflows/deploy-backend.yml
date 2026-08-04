@@ -2,7 +2,7 @@ name: Deploy PokerPulse backend
 
 on:
   push:
-    branches: [azure]
+    branches: [develop]
     paths:
       - 'src/main/**'
       - 'pom.xml'
