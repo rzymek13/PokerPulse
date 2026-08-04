@@ -11,8 +11,7 @@ import prtech.com.pokerpulse.model.chat.ChatMessage;
 import prtech.com.pokerpulse.model.game.Hand;
 import prtech.com.pokerpulse.model.player.Player;
 import prtech.com.pokerpulse.model.room.GameRoom;
-import prtech.com.pokerpulse.repository.GameRoomRepository;
-import prtech.com.pokerpulse.repository.PlayerRepository;
+import prtech.com.pokerpulse.repository.TableStorageRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GameService {
 
     @Autowired
-    GameRoomRepository gameRoomRepository;
-    @Autowired
-    PlayerRepository playerRepository;
+    TableStorageRepository tableStorageRepository;
 
     Map<Long, GameRoom> rooms = new ConcurrentHashMap<>();
 
@@ -35,7 +32,7 @@ public class GameService {
     @PostConstruct
     public void initRooms() {
         try {
-            gameRoomRepository.findAll().forEach(r -> rooms.put(r.getGameRoomId(), r));
+            tableStorageRepository.findRooms().forEach(r -> rooms.put(r.getGameRoomId(), r));
             log.info("Initialized rooms map with {} rooms", rooms.size());
         } catch (Exception e) {
             log.warn("Failed to initialize rooms map from repository", e);
@@ -43,18 +40,18 @@ public class GameService {
     }
 
     public List<Player> getPlayers() {
-        return playerRepository.findAll();
+        return tableStorageRepository.findPlayers();
     }
 
     public Player getPlayerById(Long playerId) {
-        return playerRepository.findAll().stream()
+        return tableStorageRepository.findPlayers().stream()
                 .filter(player -> player.getPlayerId().equals(playerId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player with ID " + playerId + " not found"));
     }
 
     public Player getPlayerByUsername(String username) {
-        return playerRepository.findAll().stream()
+        return tableStorageRepository.findPlayers().stream()
                 .filter(player -> player.getUsername().equals(username))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Player with username " + username + " not found"));
@@ -64,22 +61,22 @@ public class GameService {
         if (getPlayerById(playerId) == null) {
             throw new IllegalArgumentException("Player not found");
         }
-        playerRepository.deleteById(playerId);
+        tableStorageRepository.deletePlayer(playerId);
         log.info("PlayerService : Deleted player with ID {}", playerId);
     }
 
     public Player register(String username, String password) {
-        if (playerRepository.findAll().stream().anyMatch(u -> u.getUsername().equals(username))) {
+        if (tableStorageRepository.findPlayers().stream().anyMatch(u -> u.getUsername().equals(username))) {
             throw new IllegalArgumentException("Username already exists");
         }
         Player newPlayer = new Player(username, password);
-        playerRepository.save(newPlayer);
+        tableStorageRepository.savePlayer(newPlayer);
         log.info("PlayerService  : Registering new player: {}", newPlayer.getUsername());
         return newPlayer;
     }
 
     public Player login(String username, String password) {
-        return playerRepository.findAll()
+        return tableStorageRepository.findPlayers()
                 .stream()
                 .filter(u -> u.getUsername().equals(username) && u.getPassword().equals(password))
                 .findFirst()
@@ -88,19 +85,18 @@ public class GameService {
 
 
     public List<GameRoom> getAllRooms() {
-        return gameRoomRepository.findAll();
+        return tableStorageRepository.findRooms();
     }
 
 
     public GameRoom getRoomById(Long roomId) {
-        return gameRoomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room with ID " + roomId + " not found"));
+        return tableStorageRepository.findRoom(roomId);
     }
 
     public GameRoom createRoom(String roomName) {
         GameRoom room = new GameRoom(roomName);
 
-        gameRoomRepository.save(room);
+        tableStorageRepository.saveRoom(room);
         rooms.putIfAbsent(room.getGameRoomId(), room);
         log.info("GameService  :  Creating new room: {}", room);
         return room;
@@ -110,7 +106,7 @@ public class GameService {
         if (getRoomById(roomId) == null) {
             throw new IllegalArgumentException("Room not found");
         }
-        gameRoomRepository.deleteById(roomId);
+        tableStorageRepository.deleteRoom(roomId);
         rooms.remove(roomId);
         log.info("Game Service : Deleted room with ID {}", roomId);
     }
