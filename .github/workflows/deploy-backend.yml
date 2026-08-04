@@ -1,0 +1,44 @@
+name: Deploy PokerPulse backend
+
+on:
+  push:
+    branches: [azure]
+    paths:
+      - 'src/main/**'
+      - 'pom.xml'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build and test
+        run: ./mvnw package
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: 31b5a505-35c7-490b-8695-a04ed825c91d
+          tenant-id: 9965d8f6-1f48-4283-a5c9-65789b396458
+          subscription-id: 4a13ac6b-7f09-4740-953e-e17fd62d1a71
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: pokerpulse
+          package: target/PokerPulse-0.0.1-SNAPSHOT.jar
